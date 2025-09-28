@@ -23,7 +23,7 @@ pipeline {
         REPO_URL = 'https://github.com/satan212/MemoryMap-New'
         
         // --- PYTHON FIX: Explicit Path ---
-        // This is your confirmed executable path, used to call python.exe directly.
+        // Your confirmed executable path.
         PYTHON_EXE = 'C:\\Users\\nisha_r821nho\\AppData\\Local\\Programs\\Python\\Python38\\python.exe'
         PYTHON_VENV_SCRIPTS = 'venv\\Scripts' // Path to pip.exe inside the venv
     }
@@ -67,9 +67,13 @@ pipeline {
                 stage('Python Setup') {
                     steps {
                         echo 'Setting up Python Virtual Environment and tools (using explicit path)...'
-                        // FIX: Using the explicit PYTHON_EXE and VENV scripts path for reliability
+                        // FIX 1: Using the explicit PYTHON_EXE for reliability
+                        // FIX 2: Deleting cached driver manager data to force a fresh download
                         bat """
                         ${env.PYTHON_EXE} -m venv venv
+                        
+                        // Clear cached webdriver-manager downloads
+                        rmdir /S /Q %HOMEPATH%\\AppData\\Local\\WebDriverManager\\
                         
                         // Use pip from the newly created VENV to install dependencies
                         ${env.PYTHON_VENV_SCRIPTS}\\pip.exe install pytest selenium webdriver-manager pytest-html
