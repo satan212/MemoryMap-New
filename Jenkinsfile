@@ -4,7 +4,7 @@ pipeline {
 
     tools {
         // Ensures the specified Node.js version (configured in Jenkins Tools) is used
-        nodejs "Node18"
+        nodejs "Node22"
     }
 
     environment {
