@@ -3,8 +3,8 @@ pipeline {
     agent any
 
     tools {
-        // Ensures the specified Node.js version (configured in Jenkins Tools) is used
-        nodejs "Node22"
+        // Must match the name configured in Manage Jenkins -> Global Tool Configuration
+        nodejs "Node22" 
     }
 
     environment {
@@ -18,21 +18,24 @@ pipeline {
         FRONTEND_DIR = "FrontEnd"
         TESTING_DIR = "Testing"
         VENV_DIR = "venv" 
+        
+        // --- Git URL FIX ---
+        REPO_URL = 'https://github.com/satan212/MemoryMap-New'
     }
 
     stages {
         
         stage('Checkout & Setup') {
             steps {
-                // 🚨 ACTION REQUIRED: Replace with your actual Git details 🚨
-                git branch: 'main', url: 'https://github.com/<your-username>/<repo-name>.git'
+                echo "Cloning repository: ${env.REPO_URL}"
+                // FIX: Used correct repository URL from environment variable
+                git branch: 'main', url: env.REPO_URL 
                 echo 'Git Checkout Complete.'
             }
         }
         
         // ------------------------------------------------------------------------------------------------
         stage('Install Dependencies (Parallel)') {
-            // Run Node dependencies (Backend & Frontend) and Python dependencies in parallel
             parallel {
                 
                 // --- Backend Setup Branch ---
@@ -40,7 +43,8 @@ pipeline {
                     steps {
                         dir(env.BACKEND_DIR) {
                             echo 'Installing Backend Node dependencies...'
-                            sh 'npm install'
+                            // FIX: Changed sh to bat for Windows execution
+                            bat 'npm install'
                         }
                     }
                 }
@@ -50,9 +54,9 @@ pipeline {
                     steps {
                         dir(env.FRONTEND_DIR) {
                             echo 'Installing Frontend Node dependencies...'
-                            sh 'npm install'
-                            // Only install Angular CLI globally if absolutely necessary for the ng serve command
-                            sh 'npm install -g @angular/cli' 
+                            // FIX: Changed sh to bat for Windows execution
+                            bat 'npm install'
+                            bat 'npm install -g @angular/cli' 
                         }
                     }
                 }
@@ -61,13 +65,14 @@ pipeline {
                 stage('Python Setup') {
                     steps {
                         echo 'Setting up Python Virtual Environment and tools...'
-                        sh '''
-                        // Create venv at the workspace root
-                        python3 -m venv venv
-                        . venv/bin/activate
-                        // Install testing libraries
+                        // FIX: Changed sh to bat for Windows execution
+                        bat """
+                        python -m venv venv
+                        // Note: Venv activation command is different on Windows cmd/bat, 
+                        // but pip/python calls often work after environment setup.
+                        // We will rely on explicit pathing or ensuring python/pip are in the PATH.
                         pip install pytest selenium webdriver-manager pytest-html
-                        '''
+                        """
                     }
                 }
             } // end parallel
@@ -75,7 +80,6 @@ pipeline {
 
         // ------------------------------------------------------------------------------------------------
         stage('Start Services (Parallel)') {
-             // Run the backend and frontend startup commands in parallel
              parallel {
                 
                 // --- Start Backend Branch ---
@@ -83,7 +87,9 @@ pipeline {
                     steps {
                         dir(env.BACKEND_DIR) {
                             echo "Starting Node Backend on port ${env.BACKEND_PORT}..."
-                            sh "nohup node server.js > backend.log 2>&1 &"
+                            // FIX: Changed sh to bat for Windows execution
+                            // Use START command to run in the background on Windows
+                            bat "start /B node server.js" 
                         }
                     }
                 }
@@ -93,8 +99,8 @@ pipeline {
                     steps {
                         dir(env.FRONTEND_DIR) {
                             echo "Starting Angular Frontend on port ${env.FRONTEND_PORT}..."
-                            // ng serve starts the development server
-                            sh "nohup ng serve --port ${env.FRONTEND_PORT} --host 0.0.0.0 > frontend.log 2>&1 &"
+                            // FIX: Changed sh to bat for Windows execution
+                            bat "start /B ng serve --port ${env.FRONTEND_PORT} --host 0.0.0.0"
                         }
                     }
                 }
@@ -105,15 +111,15 @@ pipeline {
         stage('Wait for Apps & Run Tests') {
             steps {
                 echo 'Waiting 30 seconds for services to become fully stable...'
-                sh 'sleep 30'
+                // The sleep step is generic and should be fine
+                sleep 30 
                 
                 dir(env.TESTING_DIR) {
                     echo 'Activating Python Venv and executing Selenium tests...'
-                    // Activate venv using the path relative to the Testing directory
-                    sh '''
-                    . ../venv/bin/activate
-                    pytest --html=report.html --self-contained-html -v
-                    '''
+                    // FIX: Changed sh to bat for Windows execution
+                    // Note: Venv activation is complex in BAT/CMD. We will use the direct python path if needed.
+                    // For now, let's try the simple bat call:
+                    bat "pytest --html=report.html --self-contained-html -v"
                 }
             }
         }
@@ -122,7 +128,6 @@ pipeline {
         stage('Publish Test Report') {
             steps {
                 echo 'Publishing HTML test report to Jenkins UI...'
-                // Assumes 'report.html' is generated inside the 'Testing' directory
                 publishHTML(target: [
                     allowMissing: true,
                     alwaysLinkToLastBuild: true,
@@ -138,10 +143,15 @@ pipeline {
     // ------------------------------------------------------------------------------------------------
     post {
         always {
-            echo 'Cleanup: Killing background Node/Angular processes...'
-            // Use '|| true' to ensure the pipeline doesn't fail if the processes already died.
-            sh 'pkill -f "ng serve" || true'
-            sh 'pkill -f "node server.js" || true'
+            echo 'Cleanup: Killing background Node/Angular processes using PowerShell...'
+            // FIX: Replaced pkill (Linux) with taskkill (Windows) via powershell
+            powershell '''
+                # Kill node processes started by the CI job
+                taskkill /F /IM node.exe /T /FI "WINDOWTITLE eq MemoryMap-Test-Pipeline" | Out-Null
+                # Kill Angular CLI processes (often run as node.exe)
+                taskkill /F /IM cmd.exe /FI "WINDOWTITLE eq ng" | Out-Null
+                # $LASTEXITCODE is 0 if successful or if processes weren't found.
+            '''
             echo 'Cleanup complete.'
         }
     }
