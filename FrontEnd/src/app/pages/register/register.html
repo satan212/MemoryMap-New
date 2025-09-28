@@ -1,0 +1,19 @@
+<div class="register-container">
+    <h2>Register</h2>
+    <div class="form-group">
+      <input type="text" placeholder="Username" [(ngModel)]="username" />
+    </div>
+    <div class="form-group">
+      <input type="email" placeholder="Email" [(ngModel)]="email" />
+    </div>
+    <div class="form-group">
+      <input type="password" placeholder="Password" [(ngModel)]="password" />
+    </div>
+    <div class="form-group">
+      <input type="password" placeholder="Confirm Password" [(ngModel)]="confirmPassword" />
+    </div>
+    <div class="form-group">
+      <button (click)="register()">Register</button>
+    </div>
+  </div>
+  

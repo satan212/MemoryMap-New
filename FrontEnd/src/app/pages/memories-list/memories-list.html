@@ -1,0 +1,86 @@
+<div class="page-container">
+    <div class="memories-container">
+  
+      <!-- Header Section -->
+      <div class="header">
+        <h2>📍 Memories at this Location</h2>
+        <p class="location-info" *ngIf="lat && lng">
+          Location: {{lat | number:'1.4-4'}}, {{lng | number:'1.4-4'}}
+        </p>
+        <div class="header-actions">
+          <button (click)="goBackToMap()" class="back-btn">
+            ← Back to Map
+          </button>
+          <button (click)="addNewMemory()" class="add-btn">
+            ➕ Add Memory Here
+          </button>
+        </div>
+      </div>
+  
+      <!-- Filters Section -->
+      <div class="filters" *ngIf="allMemories.length > 1">
+        <div class="filter-group">
+          <label for="search">🔍 Search:</label>
+          <input 
+            id="search"
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            placeholder="Search memories..."
+            class="filter-input"
+            (input)="filterMemories()"
+          />
+        </div>
+  
+        <div class="filter-group">
+          <label for="tagFilter">🏷️ Filter by tag:</label>
+          <select 
+            id="tagFilter" 
+            [(ngModel)]="selectedTag" 
+            (change)="filterMemories()" 
+            class="filter-select"
+          >
+            <option value="">All Tags</option>
+            <option *ngFor="let tag of availableTags" [value]="tag">{{tag}}</option>
+          </select>
+        </div>
+  
+        <button (click)="clearFilters()" class="btn-secondary">
+          Clear Filters
+        </button>
+      </div>
+  
+      <!-- Memories Grid -->
+      <div class="memories-grid" *ngIf="filteredMemories.length > 0; else noResults">
+        <div class="memory-card" 
+             *ngFor="let memory of filteredMemories; trackBy: trackByMemoryId" 
+             (click)="viewMemory(memory.id)">
+          <div class="memory-card-header">
+            <h3 class="memory-title">{{memory.title}}</h3>
+            <!-- Date removed -->
+          </div>
+  
+          <div class="memory-description">
+            <p>{{getMemoryPreview(memory.description)}}</p>
+          </div>
+  
+          <div class="memory-tags">
+            <span *ngFor="let tag of memory.tags" class="tag">{{tag}}</span>
+          </div>
+  
+          <div class="memory-actions">
+            <button class="view-btn">View Memory</button>
+          </div>
+        </div>
+      </div>
+  
+      <!-- No Results Template -->
+      <ng-template #noResults>
+        <div class="no-results">
+          <h3>No memories found</h3>
+          <p>Try changing your filters or search term.</p>
+        </div>
+      </ng-template>
+  
+    </div>
+  </div>
+  

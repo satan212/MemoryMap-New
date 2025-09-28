@@ -1,0 +1,84 @@
+<div class="page-container">
+    <div *ngIf="memory" class="memory-view-container">
+      <div class="memory-header">
+        <div class="header-content">
+          <h1 class="memory-title">{{memory.title}}</h1>
+          <div class="memory-meta">
+            <span class="meta-item">
+              <strong>📍 Location:</strong> {{memory.lat | number:'1.4-4'}}, {{memory.lng | number:'1.4-4'}}
+            </span>
+            <span class="meta-item">
+              <strong>👤 Created by:</strong> {{memory.uploadedBy}}
+            </span>
+            <span class="meta-item">
+              <strong>📅 Date:</strong> {{memory.createdAt | date:'medium'}}
+            </span>
+          </div>
+        </div>
+        <button (click)="goBackToMap()" class="back-btn">
+          ← Back to Map
+        </button>
+      </div>
+  
+      <div class="memory-content">
+        <div class="description-section" *ngIf="memory.description">
+          <h3>📖 Description</h3>
+          <p class="description-text">{{memory.description}}</p>
+        </div>
+  
+        <div class="tags-section" *ngIf="memory.tags && memory.tags.length > 0">
+          <h3>🏷️ Tags</h3>
+          <div class="tags-container">
+            <span 
+              *ngFor="let tag of memory.tags" 
+              class="tag"
+              (click)="searchByTag(tag)"
+            >
+              {{tag}}
+            </span>
+          </div>
+        </div>
+  
+        <div class="file-section" *ngIf="memory.fileName">
+          <h3>📎 Attached File</h3>
+          <div class="file-info">
+            <span class="file-name">{{memory.fileName}}</span>
+            <span class="file-note">(File content not displayed in demo)</span>
+          </div>
+        </div>
+  
+        <div class="location-section">
+          <h3>🗺️ Location Details</h3>
+          <div class="location-info">
+            <p><strong>Latitude:</strong> {{memory.lat}}</p>
+            <p><strong>Longitude:</strong> {{memory.lng}}</p>
+            <button (click)="viewOnMap()" class="view-map-btn">
+              View on Map
+            </button>
+          </div>
+        </div>
+      </div>
+  
+      <div class="actions-section">
+        <button (click)="addAnotherMemory()" class="btn-secondary">
+          ➕ Add Another Memory
+        </button>
+        <button (click)="viewAllMemories()" class="btn-primary">
+          📋 View All Memories
+        </button>
+      </div>
+    </div>
+  
+    <div *ngIf="!memory && !loading" class="error-container">
+      <h2>❌ Memory Not Found</h2>
+      <p>The memory you're looking for doesn't exist or may have been removed.</p>
+      <button (click)="goBackToMap()" class="btn-primary">
+        ← Back to Map
+      </button>
+    </div>
+  
+    <div *ngIf="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading memory...</p>
+    </div>
+  </div>

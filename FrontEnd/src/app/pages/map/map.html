@@ -1,0 +1,39 @@
+<div class="page-container">
+    <div class="search-container">
+      <h2>📍 Memory Map</h2>
+      <div class="search-bar">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTag" 
+          placeholder="Search memories by tag..."
+          class="search-input"
+          (keyup.enter)="searchMemories()"
+        />
+        <button (click)="searchMemories()" class="search-btn">Search</button>
+        <button (click)="clearSearch()" class="clear-btn">Clear</button>
+      </div>
+      <div class="tags-container" *ngIf="availableTags.length > 0">
+        <span class="tags-label">Popular tags:</span>
+        <span 
+          *ngFor="let tag of availableTags.slice(0, 8)" 
+          class="tag-chip"
+          (click)="searchByTag(tag)"
+        >
+          {{tag}}
+        </span>
+      </div>
+      <div class="stats" *ngIf="filteredMemoriesCount > 0">
+        <span class="stats-text">
+          Showing {{filteredMemoriesCount}} memor{{filteredMemoriesCount === 1 ? 'y' : 'ies'}}
+          <span *ngIf="searchTag"> for "{{searchTag}}"</span>
+        </span>
+      </div>
+    </div>
+    
+    <div id="map" class="map-container"></div>
+    
+    <div class="instructions">
+      <p>💡 Click anywhere on the map to add a new memory, or click existing markers to view memories!</p>
+      <p *ngIf="availableTags.length > 0">🔍 Use the search bar above to filter memories by tags.</p>
+    </div>
+  </div>

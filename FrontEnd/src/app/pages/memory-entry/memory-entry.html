@@ -1,0 +1,97 @@
+<div class="page-container">
+  <div class="memory-entry-container">
+    <div class="header">
+      <h2>📝 Add New Memory</h2>
+      <p class="location-info">Location: {{lat}}, {{lng}}</p>
+    </div>
+
+    <form [formGroup]="memoryForm" (ngSubmit)="onSubmit()" class="memory-form">
+      <div class="form-group">
+        <label for="title">Memory Title *</label>
+        <input 
+          id="title"
+          type="text"
+          formControlName="title" 
+          placeholder="Give your memory a meaningful title..."
+          class="form-input"
+        />
+        <div *ngIf="memoryForm.get('title')?.touched && memoryForm.get('title')?.invalid" class="error">
+          Title is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea 
+          id="description"
+          formControlName="description" 
+          placeholder="Describe this memory in detail..."
+          class="form-textarea"
+          rows="4"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="uploadedBy">Your Name *</label>
+        <input 
+          id="uploadedBy"
+          type="text"
+          formControlName="uploadedBy" 
+          placeholder="Enter your name..."
+          class="form-input"
+        />
+        <div *ngIf="memoryForm.get('uploadedBy')?.touched && memoryForm.get('uploadedBy')?.invalid" class="error">
+          Name is required.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="tags">Tags</label>
+        <input 
+          id="tags"
+          type="text"
+          formControlName="tags" 
+          placeholder="e.g. vacation, family, friends, devotional..."
+          class="form-input"
+        />
+        <div class="tag-suggestions">
+          <span class="tag-label">Popular tags:</span>
+          <span 
+            *ngFor="let tag of suggestedTags" 
+            class="tag-suggestion"
+            (click)="addSuggestedTag(tag)"
+          >
+            {{tag}}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="file">Upload Photo/File</label>
+        <div class="file-upload-area">
+          <input 
+            id="file"
+            type="file" 
+            (change)="onFileChange($event)"
+            class="file-input"
+            accept="image/*,video/*,.pdf,.doc,.docx"
+          />
+          <div class="file-upload-text">
+            <span *ngIf="!selectedFileName">📁 Choose a file to upload</span>
+            <span *ngIf="selectedFileName" class="selected-file">✅ {{selectedFileName}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" (click)="goBack()" class="btn-secondary">
+          ← Back to Map
+        </button>
+        <button type="submit" [disabled]="memoryForm.invalid || isSubmitting" class="btn-primary">
+          <span *ngIf="!isSubmitting">💾 Save Memory</span>
+          <span *ngIf="isSubmitting">Saving...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
